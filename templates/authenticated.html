@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ru">
+<link rel="favicon" type="image/x-icon" href="/static/favicon.ico">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    {% block styles %}
+        <style>
+            /* Основные стили для страницы */
+            body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                background-color: #777; /* Серый фон */
+                overflow: hidden;
+            }
+
+            ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background-color: rgba(33, 37, 36, 0.3); 
+                position: fixed;
+                top: 0;
+                width: 100%;
+                z-index: 1;
+            }
+
+            li {
+                float: left;
+            }
+
+            li a {
+                display: block;
+                color: white;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+            }
+
+            li a:hover {
+                background-color: rgba(16, 25, 23, 0.4); 
+            }
+
+            #content {
+                position: relative;
+                z-index: 0; 
+                padding-top: 60px;
+            }
+
+            /* Контейнер для дождя */
+            .rain {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none; /* Капли не блокируют клики по другим элементам */
+                z-index: 10;
+            }
+
+            /* Капли дождя */
+            .drop {
+                position: absolute;
+                width: 2px;
+                height: 20px;
+                background: rgba(255, 255, 255, 0.6); /* Белые капли дождя */
+                animation: fall linear infinite;
+            }
+
+            /* Анимация падения капель */
+            @keyframes fall {
+                0% {
+                    transform: translateY(-100px); /* Начальная позиция капли */
+                }
+                100% {
+                    transform: translateY(100vh); /* Конечная позиция капли (ниже экрана) */
+                }
+            }
+
+            /* Случайная продолжительность анимации для капель */
+            .drop:nth-child(odd) {
+                animation-duration: 1.2s;
+            }
+
+            .drop:nth-child(even) {
+                animation-duration: 1.5s;
+            }
+
+            /* Случайные задержки для капель */
+            .drop:nth-child(3n) {
+                animation-delay: 0.3s;
+            }
+
+            .drop:nth-child(5n) {
+                animation-delay: 0.5s;
+            }
+        </style>
+    {% endblock %}
+    <ul>
+        <li style="float: right"><a href="javascript:void(0);" onclick="logout()">Выйти</a></li>
+        <li style="float: left"><a class="active" href="/authenticated/">На главную</a></li>
+    </ul>
+
+</head>
+<body>
+    <!-- Контейнер для дождя -->
+    <div class="rain"></div>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    {% block scripts %}
+        <script>
+            // Функция для создания капель дождя
+            function createRain() {
+                const rainContainer = document.querySelector('.rain');
+                const numberOfDrops = 100; // Количество капель дождя
+
+                // Создаем капли
+                for (let i = 0; i < numberOfDrops; i++) {
+                    const drop = document.createElement('div');
+                    drop.classList.add('drop');
+
+                    // Случайное размещение капель по горизонтали
+                    drop.style.left = Math.random() * 100 + 'vw'; // Случайная позиция по горизонтали
+                    drop.style.animationDuration = Math.random() * 2 + 1 + 's'; // Случайная продолжительность анимации
+
+                    rainContainer.appendChild(drop);
+                }
+            }
+
+            // Запуск дождя после загрузки страницы
+            window.onload = function() {
+                createRain();
+            }
+            // получение куки
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+
+            // декодирование JWT
+            function decodeJWT(token) {
+                try {
+                    const base64Url = token.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonPayload = JSON.parse(atob(base64));
+                    return jsonPayload;
+                } catch (e) {
+                    console.error('ошибка декодирования токена:', e);
+                    return null;
+                }
+            }
+
+            // обновление токена
+            async function refreshToken() {
+                try {
+                    console.log("попытка обновления токена...");
+                    
+                    const response = await fetch('/jwt/refresh/', {
+                        method: 'POST',
+                        credentials: 'include', 
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const newAccessToken = data.access_token;
+
+                        console.log("токен успешно обновлен:", newAccessToken);
+
+                        document.cookie = `access_token=${newAccessToken}; path=/; samesite=Lax; secure=false;`;
+                        console.log("куки обновлены:", document.cookie);
+
+                        startTokenRefreshTimer(newAccessToken);
+                    } else {
+                        console.error('ошибка при обновлении токена:', response.status);
+                        handleTokenExpiration();
+                    }
+                } catch (error) {
+                    console.error('ошибка при попытке обновления токена:', error);
+                    handleTokenExpiration();
+                }
+            }
+
+            function startTokenRefreshTimer(accessToken) {
+                const payload = decodeJWT(accessToken);
+                if (!payload || !payload.exp) {
+                    console.warn("ошибка получения времени истечения токена");
+                    handleTokenExpiration();
+                    return;
+                }
+
+                const exp = payload.exp * 1000;
+                const currentTime = Date.now();
+                const delay = exp - currentTime - 30000;
+
+                if (delay > 0) {
+                    console.log(`обновление токена запланировано через ${delay / 1000} секунд`);
+                    setTimeout(refreshToken, delay);
+                } else {
+                    console.warn('токен истёк, требуется авторизация');
+                    handleTokenExpiration();
+                }
+            }
+
+            function isTokenExpired(token) {
+                const payload = decodeJWT(token);
+                if (!payload || !payload.exp) return true;
+                const exp = payload.exp * 1000;
+                return Date.now() >= exp;
+            }
+
+            const accessToken = getCookie("access_token");
+            if (accessToken) {
+                if (isTokenExpired(accessToken)) {
+                    refreshToken();
+                } else {
+                    startTokenRefreshTimer(accessToken);
+                }
+            } else {
+                console.error("Токен отсутствует, требуется авторизация.");
+            }
+
+            function handleTokenExpiration() {
+                alert('Сессия истекла. Выполните вход заново.');
+                logout();
+            }
+
+            async function logout() {
+                try {
+                    const response = await fetch('/jwt/logout', {
+                        method: 'POST', 
+                        credentials: 'include',
+                    });
+
+                    if (response.ok) {
+                        window.location.href = '/'; 
+                    } else {
+                        console.error('Ошибка при выходе');
+                    }
+                } catch (error) {
+                    console.error('Ошибка при выходе:', error);
+                }
+            }
+        </script>
+    {% endblock %}
+</body>
+</html>

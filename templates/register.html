@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+<title>{{ title }}</title>
+
+{% block styles %}
+    {{ super() }}
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #555; /* Легкий серый фон */
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            color: #333;
+        }
+
+        .form-container {
+            background-color: #fff; /* Белый фон для формы */
+            padding: 2.5rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        h1 {
+            font-size: 2rem; /* Уменьшенный размер заголовка */
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 0.5rem;
+            text-align: left; /* Выравнивание лейблов по левому краю */
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%; /* Поле занимает всю ширину контейнера */
+            padding: 0.8rem;
+            font-size: 1rem;
+            border: 2px solid #00b4d8;
+            border-radius: 8px;
+            background-color: #f0f4f8;
+            outline: none;
+            transition: border 0.3s ease;
+            box-sizing: border-box; /* Учитывает padding и border в общей ширине */
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            border-color: #0096c7;
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: flex; /* Используем flexbox для точного позиционирования */
+            align-items: center;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            cursor: pointer;
+            color: #00b4d8;
+            font-size: 1.2rem;
+            z-index: 1; /* Убедимся, что иконка будет поверх поля ввода */
+        }
+
+        button {
+            padding: 0.8rem;
+            background-color: #00b4d8;
+            color: white;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background-color: #0096c7;
+        }
+
+        button:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 2rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            button {
+                font-size: 1rem;
+            }
+
+            input[type="text"],
+            input[type="email"],
+            input[type="password"] {
+                font-size: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="form-container">
+        <h1>Регистрация</h1>
+        <form id="registerForm">
+            <div class="input-group">
+                <label for="username">Имя пользователя:</label>
+                <input type="text" id="username" name="username" required placeholder="Введите имя пользователя">
+            </div>
+            <div class="input-group">
+                <label for="email">Электронная почта (необязательно):</label>
+                <input type="email" id="email" name="email" placeholder="Введите электронную почту">
+            </div>
+            <div class="input-group password-wrapper">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" required placeholder="Введите пароль">
+                <span class="toggle-password" id="togglePassword">&#128065;</span> <!-- Иконка глазика -->
+            </div>
+            <button type="submit">Зарегистрироваться</button>
+            <div class="error" id="errorMessage"></div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        // Функция для переключения видимости пароля
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordField = document.getElementById('password');
+
+        togglePassword.addEventListener('click', function () {
+            // Переключаем тип поля (password <-> text)
+            const type = passwordField.type === 'password' ? 'text' : 'password';
+            passwordField.type = type;
+
+            // Меняем иконку в зависимости от того, скрыт или открыт пароль
+            this.textContent = type === 'password' ? '👁️' : '🔒';  // Глазик/Скрытый глазик
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); 
+
+            const formData = new FormData(e.target);
+            const data = {
+                username: formData.get('username'),
+                email: formData.get('email') || null, 
+                password: formData.get('password')
+            };
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    body: new URLSearchParams(data), 
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    window.location.href = '/jwt/login/';
+                } else {
+                    const errorData = await response.json();
+                    document.getElementById('errorMessage').textContent = errorData.detail || 'Неизвестная ошибка';
+                    document.getElementById('errorMessage').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = 'Ошибка соединения с сервером';
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        });
+    </script>
+{% endblock %}

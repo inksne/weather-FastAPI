@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .container {
+        position: relative;
+        background-color: rgba(33, 37, 36, 0.0);  
+        width: 90%;
+        overflow: visible;
+        margin: 0 auto;
+        padding: 10px;
+        margin-top: 60px;
+        outline: rgba(33, 37, 36, 1);
+    }
+
+    .content-container {
+        background-color: rgba(33, 37, 36, 0.0);
+        padding: 30px;
+        border-radius: 8px;
+        outline: rgba(33, 37, 36, 0.4);
+    }
+
+    h1 {
+        text-align: center;
+        color: #f1f1f1;
+    }
+
+    h2 {
+        color: #f1f1f1
+    }
+
+    p {
+        font-size: 18px;
+        line-height: 1.6;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+</style>
+<div class="container">
+    <div class="content-container">
+        <h1>О нас</h1>
+        <h2>Контакты</h2>
+        <p>Если у вас есть вопросы или предложения, не стесняйтесь связаться со мной:</p>
+        <p>Email: <a href="mailto:inksne@gmail.com" style="color: #88f7ff;">inksne@gmail.com</a></p>
+        <p>Код сайта лежит на гитхабе и на гитлабе (если я его не удалил)</p>
+        <p>GitHub: <a href="https://github.com/inksne" style="color:#88f7ff">https://github.com/inksne</a></p>
+        <p>GitLab: <a href="https://gitlab.com/inksne" style="color:#88f7ff">https://gitlab.com/inksne</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    {% block styles %}
+        <style>
+            /* Основные стили для страницы */
+            body, html {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                background-color: #777; /* Серый фон */
+                overflow: hidden;
+            }
+
+            /* Контейнер для дождя */
+            .rain {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none; /* Капли не блокируют клики по другим элементам */
+                z-index: 10;
+            }
+
+            /* Капли дождя */
+            .drop {
+                position: absolute;
+                width: 2px;
+                height: 20px;
+                background: rgba(255, 255, 255, 0.6); /* Белые капли дождя */
+                animation: fall linear infinite;
+            }
+
+            /* Анимация падения капель */
+            @keyframes fall {
+                0% {
+                    transform: translateY(-100px); /* Начальная позиция капли */
+                }
+                100% {
+                    transform: translateY(100vh); /* Конечная позиция капли (ниже экрана) */
+                }
+            }
+
+            /* Случайная продолжительность анимации для капель */
+            .drop:nth-child(odd) {
+                animation-duration: 1.2s;
+            }
+
+            .drop:nth-child(even) {
+                animation-duration: 1.5s;
+            }
+
+            /* Случайные задержки для капель */
+            .drop:nth-child(3n) {
+                animation-delay: 0.3s;
+            }
+
+            .drop:nth-child(5n) {
+                animation-delay: 0.5s;
+            }
+
+            ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background-color: rgba(33, 37, 36, 0.3); 
+                position: fixed;
+                top: 0;
+                width: 100%;
+                z-index: 1;
+            }
+
+            li {
+                float: left;
+            }
+
+            li a {
+                display: block;
+                color: white;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+            }
+
+            li a:hover {
+                background-color: rgba(16, 25, 23, 0.4); 
+            }
+        </style>
+    {% endblock %}
+</head>
+<body>
+    <ul>
+        <li style="float: right"><a class="active" href="/register">Зарегистрироваться</a></li>
+        <li style="float: left"><a class="active" href="/">На главную</a></li>
+        <li style="float: left"><a class="active" href="/jwt/login/">Войти</a></li>
+        <li style="float: right"><a class="active" href="/about_us">О нас</a></li>
+    </ul>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Контейнер для дождя -->
+    <div class="rain"></div>
+
+    {% block scripts %}
+        <script>
+            // Функция для создания капель дождя
+            function createRain() {
+                const rainContainer = document.querySelector('.rain');
+                const numberOfDrops = 100; // Количество капель дождя
+
+                // Создаем капли
+                for (let i = 0; i < numberOfDrops; i++) {
+                    const drop = document.createElement('div');
+                    drop.classList.add('drop');
+
+                    // Случайное размещение капель по горизонтали
+                    drop.style.left = Math.random() * 100 + 'vw'; // Случайная позиция по горизонтали
+                    drop.style.animationDuration = Math.random() * 2 + 1 + 's'; // Случайная продолжительность анимации
+
+                    rainContainer.appendChild(drop);
+                }
+            }
+
+            // Запуск дождя после загрузки страницы
+            window.onload = function() {
+                createRain();
+            }
+        </script>
+    {% endblock %}
+</body>
+</html>
