@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Вход в систему{% endblock %}
+<title>{{ title }}</title>
 
 {% block styles %}
     {{ super() }}
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #555; /* Легкий серый фон */
+            background-color: #555; 
             margin: 0;
             padding: 0;
             height: 100vh;
@@ -15,11 +15,11 @@
         }
 
         .login-container {
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(240, 240, 240);
             padding: 2.5rem;
             border-radius: 16px;
             width: 100%;
-            max-width: 400px; /* Уменьшил ширину контейнера */
+            max-width: 400px; 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
             position: absolute;
@@ -29,7 +29,7 @@
         }
 
         h1 {
-            font-size: 2rem; /* Уменьшил размер заголовка */
+            font-size: 2rem; 
             font-weight: 600;
             text-align: center;
             margin-bottom: 1.5rem;
@@ -41,28 +41,28 @@
             font-weight: 500;
             color: #333;
             margin-bottom: 0.5rem;
-            display: block; /* Для нормального отображения метки */
+            display: block;
             text-align: left;
         }
 
         .input-group {
-            margin-bottom: 1.5rem; /* Уменьшил отступы */
-            display: flex; /* Используем flexbox для выравнивания */
-            flex-direction: column; /* Выстраиваем элементы по колонке */
-            align-items: center; /* Центрируем по горизонтали */
+            margin-bottom: 1.5rem; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
         }
 
         input[type="text"],
         input[type="password"] {
-            width: 100%; /* Растягиваем поле на всю ширину */
-            padding: 0.8rem; /* Уменьшил padding */
-            font-size: 1rem; /* Уменьшил шрифт */
+            width: 100%; 
+            padding: 0.8rem; 
+            font-size: 1rem; 
             border: 2px solid #00b4d8;
             border-radius: 8px;
             background-color: #f0f4f8;
             outline: none;
             transition: border 0.3s ease;
-            box-sizing: border-box; /* Учитывает padding и border в общей ширине */
+            box-sizing: border-box; 
         }
 
         input[type="text"]:focus,
@@ -72,7 +72,7 @@
 
         .password-wrapper {
             position: relative;
-            display: flex; /* Используем flexbox для точного выравнивания */
+            display: flex; 
             align-items: center;
         }
 
@@ -82,7 +82,7 @@
             cursor: pointer;
             color: #00b4d8;
             font-size: 1.2rem;
-            z-index: 1; /* Убедимся, что иконка будет поверх поля ввода */
+            z-index: 1; 
         }
 
         button {
@@ -166,7 +166,7 @@
             <div class="input-group password-wrapper">
                 <label for="password">Пароль:</label>
                 <input type="password" id="password" name="password" required placeholder="Введите пароль">
-                <span class="toggle-password" id="togglePassword">&#128065;</span> <!-- Иконка глазика -->
+                <span class="toggle-password" id="togglePassword">&#128065;</span> 
             </div>
             <div>
                 <button type="submit">Войти</button>
@@ -182,17 +182,14 @@
 {% block scripts %}
     {{ super() }}
     <script>
-        // Функция для переключения видимости пароля
         const togglePassword = document.getElementById('togglePassword');
         const passwordField = document.getElementById('password');
 
         togglePassword.addEventListener('click', function () {
-            // Переключаем тип поля (password <-> text)
             const type = passwordField.type === 'password' ? 'text' : 'password';
             passwordField.type = type;
 
-            // Меняем иконку в зависимости от того, скрыт или открыт пароль
-            this.textContent = type === 'password' ? '👁️' : '🔒';  // Глазик/Скрытый глазик
+            this.textContent = type === 'password' ? '👁️' : '🔒';  
         });
 
         document.getElementById('loginForm').addEventListener('submit', async function(event) {

@@ -5,7 +5,6 @@
 {% block styles %}
     {{ super() }}
     <style>
-        /* Основные стили для страницы */
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #555;
@@ -17,7 +16,7 @@
         }
 
         .container {
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(240, 240, 240);
             padding: 3rem;
             border-radius: 16px;
             width: 100%;
@@ -38,7 +37,16 @@
             color: #333;
         }
 
-        /* Стили формы */
+        p {
+            font-family: 'Poppins';
+            color: black;
+            text-align: center;
+        }
+
+        a {
+            color: #00b4d8;
+        }
+
         form {
             display: flex;
             flex-direction: column;
@@ -81,7 +89,6 @@
             background-color: #0096c7;
         }
 
-        /* Результат погоды */
         .weather-result {
             background-color: #ffffff;
             padding: 2rem;
@@ -102,7 +109,6 @@
             margin-top: 1rem;
         }
 
-        /* Сообщение об ошибке */
         .error-message {
             margin-top: 1.5rem;
             color: #ff6347;
@@ -110,7 +116,6 @@
             text-align: center;
         }
 
-        /* Адаптивность */
         @media (max-width: 600px) {
             .container {
                 padding: 2rem;
@@ -134,15 +139,12 @@
 {% block content %}
     <div class="container">
         <h1>Узнайте погоду в вашем городе</h1>
-
-        <!-- Форма для ввода города всегда отображается -->
         <form action="/get_weather" method="get">
             <label for="location">Введите название города:</label>
             <input type="text" id="location" name="location" required placeholder="Например, Москва">
             <button type="submit">Получить погоду</button>
         </form>
 
-        <!-- Результат погоды -->
         {% if weather %}
             <div class="weather-result">
                 <h2>Погода в городе: {{ location }}</h2>
@@ -150,10 +152,11 @@
             </div>
         {% endif %}
 
-        <!-- Сообщение об ошибке -->
         {% if error %}
             <p class="error-message">{{ error }}</p>
         {% endif %}
+
+        <p><a href="/register">Зарегистрируйтесь</a>, чтобы видеть историю запросов.</p>
     </div>
 {% endblock %}
 

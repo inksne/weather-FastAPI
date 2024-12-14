@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #555; /* Легкий серый фон */
+            background-color: #555; 
             margin: 0;
             padding: 0;
             height: 100vh;
@@ -15,7 +15,7 @@
         }
 
         .form-container {
-            background-color: #fff; /* Белый фон для формы */
+            background-color: rgba(240, 240, 240); 
             padding: 2.5rem;
             border-radius: 16px;
             width: 100%;
@@ -28,7 +28,7 @@
         }
 
         h1 {
-            font-size: 2rem; /* Уменьшенный размер заголовка */
+            font-size: 2rem; 
             font-weight: 600;
             text-align: center;
             margin-bottom: 1.5rem;
@@ -47,13 +47,13 @@
             font-weight: 500;
             color: #333;
             margin-bottom: 0.5rem;
-            text-align: left; /* Выравнивание лейблов по левому краю */
+            text-align: left; 
         }
 
         input[type="text"],
         input[type="email"],
         input[type="password"] {
-            width: 100%; /* Поле занимает всю ширину контейнера */
+            width: 100%; 
             padding: 0.8rem;
             font-size: 1rem;
             border: 2px solid #00b4d8;
@@ -61,7 +61,7 @@
             background-color: #f0f4f8;
             outline: none;
             transition: border 0.3s ease;
-            box-sizing: border-box; /* Учитывает padding и border в общей ширине */
+            box-sizing: border-box; 
         }
 
         input[type="text"]:focus,
@@ -72,7 +72,7 @@
 
         .password-wrapper {
             position: relative;
-            display: flex; /* Используем flexbox для точного позиционирования */
+            display: flex; 
             align-items: center;
         }
 
@@ -82,7 +82,7 @@
             cursor: pointer;
             color: #00b4d8;
             font-size: 1.2rem;
-            z-index: 1; /* Убедимся, что иконка будет поверх поля ввода */
+            z-index: 1; 
         }
 
         button {
@@ -152,7 +152,7 @@
             <div class="input-group password-wrapper">
                 <label for="password">Пароль:</label>
                 <input type="password" id="password" name="password" required placeholder="Введите пароль">
-                <span class="toggle-password" id="togglePassword">&#128065;</span> <!-- Иконка глазика -->
+                <span class="toggle-password" id="togglePassword">&#128065;</span> 
             </div>
             <button type="submit">Зарегистрироваться</button>
             <div class="error" id="errorMessage"></div>
@@ -163,17 +163,14 @@
 {% block scripts %}
     {{ super() }}
     <script>
-        // Функция для переключения видимости пароля
         const togglePassword = document.getElementById('togglePassword');
         const passwordField = document.getElementById('password');
 
         togglePassword.addEventListener('click', function () {
-            // Переключаем тип поля (password <-> text)
             const type = passwordField.type === 'password' ? 'text' : 'password';
             passwordField.type = type;
 
-            // Меняем иконку в зависимости от того, скрыт или открыт пароль
-            this.textContent = type === 'password' ? '👁️' : '🔒';  // Глазик/Скрытый глазик
+            this.textContent = type === 'password' ? '👁️' : '🔒';  
         });
 
         document.getElementById('registerForm').addEventListener('submit', async function(e) {

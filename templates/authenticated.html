@@ -7,13 +7,12 @@
     <title>{{ title }}</title>
     {% block styles %}
         <style>
-            /* Основные стили для страницы */
             body {
                 margin: 0;
                 padding: 0;
                 width: 100%;
                 height: 100%;
-                background-color: #777; /* Серый фон */
+                background-color: #777;
                 overflow: hidden;
             }
 
@@ -51,37 +50,33 @@
                 padding-top: 60px;
             }
 
-            /* Контейнер для дождя */
             .rain {
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                pointer-events: none; /* Капли не блокируют клики по другим элементам */
+                pointer-events: none;
                 z-index: 10;
             }
 
-            /* Капли дождя */
             .drop {
                 position: absolute;
                 width: 2px;
                 height: 20px;
-                background: rgba(255, 255, 255, 0.6); /* Белые капли дождя */
+                background: rgba(255, 255, 255, 0.6); 
                 animation: fall linear infinite;
             }
 
-            /* Анимация падения капель */
             @keyframes fall {
                 0% {
-                    transform: translateY(-100px); /* Начальная позиция капли */
+                    transform: translateY(-100px); 
                 }
                 100% {
-                    transform: translateY(100vh); /* Конечная позиция капли (ниже экрана) */
+                    transform: translateY(100vh); 
                 }
             }
 
-            /* Случайная продолжительность анимации для капель */
             .drop:nth-child(odd) {
                 animation-duration: 1.2s;
             }
@@ -90,7 +85,6 @@
                 animation-duration: 1.5s;
             }
 
-            /* Случайные задержки для капель */
             .drop:nth-child(3n) {
                 animation-delay: 0.3s;
             }
@@ -107,7 +101,6 @@
 
 </head>
 <body>
-    <!-- Контейнер для дождя -->
     <div class="rain"></div>
 
     <div class="container">
@@ -115,25 +108,21 @@
     </div>
     {% block scripts %}
         <script>
-            // Функция для создания капель дождя
             function createRain() {
                 const rainContainer = document.querySelector('.rain');
-                const numberOfDrops = 100; // Количество капель дождя
+                const numberOfDrops = 100;
 
-                // Создаем капли
                 for (let i = 0; i < numberOfDrops; i++) {
                     const drop = document.createElement('div');
                     drop.classList.add('drop');
 
-                    // Случайное размещение капель по горизонтали
-                    drop.style.left = Math.random() * 100 + 'vw'; // Случайная позиция по горизонтали
-                    drop.style.animationDuration = Math.random() * 2 + 1 + 's'; // Случайная продолжительность анимации
+                    drop.style.left = Math.random() * 100 + 'vw'; 
+                    drop.style.animationDuration = Math.random() * 2 + 1 + 's'; 
 
                     rainContainer.appendChild(drop);
                 }
             }
 
-            // Запуск дождя после загрузки страницы
             window.onload = function() {
                 createRain();
             }

@@ -10,11 +10,20 @@ from weather.weather_formatter import format_weather
 
 from typing import NamedTuple
 from geopy.geocoders import Nominatim
+from redis import Redis
+import logging
+import time
 import asyncio
+
 
 router = APIRouter()
 
 templates = Jinja2Templates(directory='templates')
+
+r = Redis(host='127.0.0.1', port=6379, db=0)
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class Coordinates(NamedTuple):
@@ -46,64 +55,112 @@ async def get_weather_page(request: Request):
 @router.get('/get_weather', response_class=HTMLResponse)
 async def get_weather_end(request: Request, location: str):
     try:
+        weather_from_redis = r.get(f'weather:{location}')
+        if weather_from_redis:
+            formatted_weather = weather_from_redis.decode('utf-8')
+            return templates.TemplateResponse('index.html', {
+                'request': request,
+                'location': location,
+                'weather': formatted_weather,
+                'title': 'Главная'
+            })
+        
         coordinates = await get_coords(location)
+        r.set(f'location:{location}', location)  
         weather = await get_weather(coordinates)
         formatted_weather = format_weather(weather)
+        r.set(f'weather:{location}', formatted_weather)  
+        
         return templates.TemplateResponse('index.html', {
             'request': request,
             'location': location,
-            'weather': formatted_weather
+            'weather': formatted_weather,
+            'title': 'Главная'
         })
     except CantGetCoordinates as e:
+        logger.error(str(e))
         return templates.TemplateResponse('index.html', {
             'request': request,
             'location': location,
-            'error': str(e)
+            'error': 'Невозможно получить координаты.',
+            'title': 'Главная'
         })
     except ApiServiceError as e:
+        logger.error(str(e))
         return templates.TemplateResponse('index.html', {
             'request': request,
             'location': location,
-            'error': 'Ошибка сервиса погоды.'
+            'error': 'Ошибка сервиса погоды.',
+            'title': 'Главная'
         })
     except Exception as e:
+        logger.error(str(e))
         return templates.TemplateResponse('index.html', {
             'request': request,
             'location': location,
-            'error': 'Произошла неизвестная ошибка.'
+            'error': 'Произошла неизвестная ошибка.',
+            'title': 'Главная'
         })
-    
+
 
 @router.get('/authenticated/get_weather', response_class=HTMLResponse)
-async def get_weather_end(request: Request, location: str):
+async def get_auth_weather_end(request: Request, location: str):
     try:
-        coordinates = await get_coords(location)
-        weather = await get_weather(coordinates)
-        formatted_weather = format_weather(weather)
+        weather_from_redis = r.get(f'weather:{location}')
+        if weather_from_redis:
+            formatted_weather = weather_from_redis.decode('utf-8')
+        else:
+            coordinates = await get_coords(location)
+            r.set(f'location:{location}', location)  
+            weather = await get_weather(coordinates)
+            formatted_weather = format_weather(weather)
+            r.set(f'weather:{location}', formatted_weather)  
+            r.expire(f'weather:{location}', 1800)  #TTL на 30 минут
+            r.expire(f'location:{location}', 1800)  
+            logger.info(f"Сохранены в Redis: location={location}, weather={formatted_weather}")
+
+        current_time = int(time.time())  
+        request_key = f"weather_request:{current_time}:{location}"
+        r.set(request_key, location)  
+        r.expire(request_key, 1800)  
+
         return templates.TemplateResponse('auth_index.html', {
             'request': request,
             'location': location,
-            'weather': formatted_weather
-        })
-    except CantGetCoordinates as e:
-        return templates.TemplateResponse('auth_index.html', {
-            'request': request,
-            'location': location,
-            'error': str(e)
-        })
-    except ApiServiceError as e:
-        return templates.TemplateResponse('auth_index.html', {
-            'request': request,
-            'location': location,
-            'error': 'Ошибка сервиса погоды.'
-        })
-    except Exception as e:
-        return templates.TemplateResponse('auth_index.html', {
-            'request': request,
-            'location': location,
-            'error': 'Произошла неизвестная ошибка.'
+            'weather': formatted_weather,
+            'recent_locations': [],
+            'title': 'Главная'
         })
     
+    except CantGetCoordinates as e:
+        logger.error(str(e))
+        return templates.TemplateResponse('auth_index.html', {
+            'request': request,
+            'location': location,
+            'error': str(e),
+            'recent_locations': [],
+            'title': 'Главная'
+        })
+    except ApiServiceError as e:
+        logger.error(str(e))
+        return templates.TemplateResponse('auth_index.html', {
+            'request': request,
+            'location': location,
+            'error': 'Ошибка сервиса погоды.',
+            'recent_locations': [],
+            'title': 'Главная'  
+        })
+    except Exception as e:
+        logger.error(str(e))
+        return templates.TemplateResponse('auth_index.html', {
+            'request': request,
+            'location': location,
+            'error': 'Произошла неизвестная ошибка.',
+            'recent_locations': [],
+            'title': 'Главная'  
+        })
+
+
 
 @router.get('/about_us', response_class=HTMLResponse)
 async def get_about_us_page(request: Request):
@@ -122,4 +179,42 @@ async def get_register_page(request: Request):
 
 @router.get('/authenticated/', response_class=HTMLResponse)
 async def get_authenticated_page(request: Request):
-    return templates.TemplateResponse('auth_index.html', {'request': request, 'title': 'Главная'})
+    try:
+        cursor, recent_requests = r.scan(match="weather_request:*", count=100)
+
+        recent_locations = []
+        seen = set()
+
+        for req in recent_requests:
+            decoded_loc = r.get(req).decode('utf-8')  
+            if decoded_loc not in seen:
+                seen.add(decoded_loc)
+                recent_locations.append(decoded_loc)
+
+        weather_data = []
+        for location in recent_locations:
+            weather_from_redis = r.get(f'weather:{location}')
+            if weather_from_redis:
+                formatted_weather = weather_from_redis.decode('utf-8')
+            else:
+                coordinates = await get_coords(location)
+                weather = await get_weather(coordinates)
+                formatted_weather = format_weather(weather)
+                r.set(f'weather:{location}', formatted_weather)
+                r.expire(f'weather:{location}', 1800)  
+            weather_data.append({'location': location, 'weather': formatted_weather})
+
+        logger.info(f"Недавние запросы для отображения: {recent_locations}")
+
+        return templates.TemplateResponse('auth_index.html', {
+            'request': request,
+            'recent_locations': weather_data ,
+            'title': 'Главная'
+        })
+    except Exception as e:
+        logger.error(str(e))
+        return templates.TemplateResponse('auth_index.html', {
+            'request': request,
+            'error': 'Произошла ошибка при получении данных.',
+            'title': 'Главная'
+        })

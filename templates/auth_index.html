@@ -5,7 +5,6 @@
 {% block styles %}
     {{ super() }}
     <style>
-        /* Основные стили для страницы */
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #555;
@@ -13,21 +12,39 @@
             padding: 0;
             height: 100vh;
             color: white;
-            display: block;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .container {
+        .content-container {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .main-container {
             background-color: rgba(255, 255, 255, 0.9);
             padding: 3rem;
             border-radius: 16px;
-            width: 100%;
-            max-width: 500px;
+            width: 65%;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        }
+
+        .recent-requests-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 3rem;
+            border-radius: 16px;
+            width: 30%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin-left: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
         }
 
         h1 {
@@ -38,39 +55,53 @@
             color: #333;
         }
 
-        /* Стили формы */
+        .recent-requests {
+            background-color: #f0f4f8;
+            padding: 1rem;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .recent-requests h3 {
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .recent-requests p {
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .weather-info {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
         form {
             display: flex;
             flex-direction: column;
-            gap: 1.2rem;
-        }
-
-        label {
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: #333;
-            text-align: left;
+            margin-bottom: 2rem;
         }
 
         input[type="text"] {
-            padding: 1rem;
-            font-size: 1.1rem;
-            border: 2px solid #00b4d8;
+            padding: 0.5rem;
+            font-size: 1rem;
+            margin-bottom: 1rem;
             border-radius: 8px;
-            background-color: #f0f4f8;
-            outline: none;
-            transition: border 0.3s ease;
-        }
-
-        input[type="text"]:focus {
-            border-color: #0096c7;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            color: #333;
         }
 
         button {
-            padding: 1rem;
+            padding: 0.75rem;
+            font-size: 1.1rem;
             background-color: #00b4d8;
             color: white;
-            font-size: 1.2rem;
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -81,78 +112,46 @@
             background-color: #0096c7;
         }
 
-        /* Результат погоды */
-        .weather-result {
-            background-color: #ffffff;
-            padding: 2rem;
-            border-radius: 8px;
-            margin-top: 2rem;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .weather-result h2 {
-            font-size: 1.6rem;
-            color: #333;
-            font-weight: 600;
-        }
-
-        .weather-result p {
-            font-size: 1.3rem;
-            color: #555;
-            margin-top: 1rem;
-        }
-
-        /* Сообщение об ошибке */
         .error-message {
-            margin-top: 1.5rem;
-            color: #ff6347;
-            font-size: 1.1rem;
+            color: red;
+            font-weight: bold;
             text-align: center;
-        }
-
-        /* Адаптивность */
-        @media (max-width: 600px) {
-            .container {
-                padding: 2rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            button {
-                font-size: 1rem;
-            }
-
-            input[type="text"] {
-                font-size: 1rem;
-            }
         }
     </style>
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <h1>Узнайте погоду в вашем городе</h1>
+    <div class="content-container">
+        <div class="main-container">
+            <h1>Узнайте погоду в вашем городе</h1>
 
-        <!-- Форма для ввода города всегда отображается -->
-        <form action="/authenticated/get_weather" method="get">
-            <label for="location">Введите название города:</label>
-            <input type="text" id="location" name="location" required placeholder="Например, Москва">
-            <button type="submit">Получить погоду</button>
-        </form>
+            <form action="/authenticated/get_weather" method="get">
+                <label for="location" style="color: black">Введите название города:</label>
+                <input type="text" id="location" name="location" required placeholder="Например, Москва">
+                <button type="submit">Получить погоду</button>
+            </form>
 
-        <!-- Результат погоды -->
-        {% if weather %}
-            <div class="weather-result">
-                <h2>Погода в городе: {{ location }}</h2>
-                <p>{{ weather }}</p>
+            {% if error %}
+                <p class="error-message">{{ error }}</p>
+            {% endif %}
+
+            {% if weather %}
+                <div class="weather-info">
+                    <h3>Погода в городе {{ location }}:</h3>
+                    <p>{{ weather }}</p>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if recent_locations %}
+            <div class="recent-requests-container">
+                <div class="recent-requests">
+                    <h3>Запросы за последние 30 минут:</h3>
+                    {% for item in recent_locations %}
+                        <p>{{ item.location }}: {{ item.weather }}</p>
+                    {% endfor %}
+                </div>
             </div>
-        {% endif %}
-
-        <!-- Сообщение об ошибке -->
-        {% if error %}
-            <p class="error-message">{{ error }}</p>
         {% endif %}
     </div>
 {% endblock %}
