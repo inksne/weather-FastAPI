@@ -3,10 +3,10 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from starlette import status
 
-from weather.config import USE_ROUNDED_COORDS
-from weather.exceptions import CantGetCoordinates, ApiServiceError
-from weather.weather_api_service import get_weather
-from weather.weather_formatter import format_weather
+from weather_get.config import USE_ROUNDED_COORDS
+from weather_get.exceptions import CantGetCoordinates, ApiServiceError
+from weather_get.weather_api_service import get_weather
+from weather_get.weather_formatter import format_weather
 
 from typing import NamedTuple
 from geopy.geocoders import Nominatim
