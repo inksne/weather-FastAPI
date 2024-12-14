@@ -1,16 +1,9 @@
-from fastapi import FastAPI, HTTPException, APIRouter, Form, Depends
-from starlette import status
+from fastapi import FastAPI, APIRouter, Form, Depends
 
-from typing import NamedTuple, Optional
+from typing import Optional
 from pydantic import BaseModel
-from geopy.geocoders import Nominatim
 import logging
-import asyncio
 
-from weather.config import USE_ROUNDED_COORDS
-from weather.exceptions import CantGetCoordinates, ApiServiceError
-from weather.weather_api_service import get_weather
-from weather.weather_formatter import format_weather
 from templates.router import router as base_router
 from auth.auth import router as jwt_router
 from auth.utils import hash_password
