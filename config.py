@@ -6,8 +6,6 @@ from pathlib import Path
 load_dotenv()
 config = dotenv_values('.env')
 
-DB_HOST = config.get("DB_HOST")
-DB_PORT = config.get("DB_PORT")
 DB_USER = config.get("DB_USER")
 DB_PASS = config.get("DB_PASS")
 DB_NAME = config.get("DB_NAME")
@@ -29,7 +27,7 @@ class Settings(BaseSettings):
 settings = Settings()
 
 class DBSettings(BaseSettings):
-    db_url: str = f'postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+    db_url: str = f'postgresql+asyncpg://{DB_USER}:{DB_PASS}@localhost:5432/{DB_NAME}'
     db_echo: bool = False
 
 db_settings = DBSettings()
