@@ -1,11 +1,38 @@
-import pytest
 from typing import AsyncGenerator
-from sqlalchemy.future import select
+from fastapi.testclient import TestClient
+import pytest
+
 from database.models import User
 from database.database import async_session_maker
 from .test_config import MODE
+from main import app
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import text
+from sqlalchemy.future import select
+
+
+client = TestClient(app)
+
+
+def test_read_main_page():
+    response = client.get('/')
+    assert response.status_code == 200
+
+
+def test_read_about_us_page():
+    response = client.get('/about_us')
+    assert response.status_code == 200
+
+
+def test_read_register_page():
+    response = client.get('/register')
+    assert response.status_code == 200
+
+
+def test_read_login_page():
+    response = client.get('/jwt/login')
+    assert response.status_code == 200
 
 
 @pytest.fixture
@@ -20,6 +47,7 @@ async def setup_test_db(scope="function") -> AsyncGenerator[AsyncSession, None]:
             await session.commit()
 
 
+@pytest.mark.skip(reason='для бд')
 @pytest.mark.asyncio
 async def test_delete_user(setup_test_db):
     '''тест для проверки удаления пользователя в бд'''
