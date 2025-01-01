@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, ConfigDict, validator
+from pydantic import BaseModel, EmailStr, ConfigDict, field_validator
 from typing import Optional
 
 
@@ -16,7 +16,7 @@ class UserSchema(BaseModel):
             email=obj.email,
         )
     
-    @validator('email', pre=True, always=True)
+    @field_validator('email', mode='before')
     def check_email(cls, v):
         if v in [None, '', 'null'] or '@.' not in v:
             return None
