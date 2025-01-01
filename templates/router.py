@@ -112,7 +112,6 @@ async def get_auth_weather_end(request: Request, location: str):
             r.set(f'weather:{location}', formatted_weather)  
             r.expire(f'weather:{location}', 1800)  #TTL на 30 минут
             r.expire(f'location:{location}', 1800)  
-            logger.info(f"Сохранены в Redis: location={location}, weather={formatted_weather}")
 
         current_time = int(time.time())  
         request_key = f"weather_request:{current_time}:{location}"
@@ -194,8 +193,6 @@ async def get_authenticated_page(request: Request):
                 r.set(f'weather:{location}', formatted_weather)
                 r.expire(f'weather:{location}', 1800)  
             weather_data.append({'location': location, 'weather': formatted_weather})
-
-        logger.info(f"Недавние запросы для отображения: {recent_locations}")
 
         return templates.TemplateResponse(request, 'auth_index.html', {
             'recent_locations': weather_data ,
