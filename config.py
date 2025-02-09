@@ -1,15 +1,14 @@
-from dotenv import load_dotenv, dotenv_values
+from dotenv import load_dotenv
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 from pathlib import Path
+import os
 
 load_dotenv()
-config = dotenv_values('.env')
 
-DB_USER = config.get("DB_USER")
-DB_PASS = config.get("DB_PASS")
-DB_NAME = config.get("DB_NAME")
-MODE = config.get("MODE")
+POSTGRES_USER = os.environ.get("POSTGRES_USER")
+POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
+POSTGRES_DB = os.environ.get("POSTGRES_DB")
 
 
 class AuthJWT(BaseModel):
@@ -27,7 +26,7 @@ class Settings(BaseSettings):
 settings = Settings()
 
 class DBSettings(BaseSettings):
-    db_url: str = f'postgresql+asyncpg://{DB_USER}:{DB_PASS}@localhost:5432/{DB_NAME}'
+    db_url: str = f'postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@postgres:5432/{POSTGRES_DB}'
     db_echo: bool = False
 
 db_settings = DBSettings()

@@ -2,10 +2,10 @@ from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from config import DB_NAME, DB_PASS, DB_USER
+from config import POSTGRES_USER, POSTGRES_DB, POSTGRES_PASSWORD
 from .models import Base
 
-DATABASE_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASS}@localhost:5432/{DB_NAME}'
+DATABASE_URL = f'postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@postgres:5432/{POSTGRES_DB}'
 
 
 engine = create_async_engine(DATABASE_URL)

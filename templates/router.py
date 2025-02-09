@@ -20,7 +20,7 @@ router = APIRouter()
 
 templates = Jinja2Templates(directory='templates')
 
-r = Redis(host='127.0.0.1', port=6379, db=0)
+r = Redis(host='redis', port=6379, db=0)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
